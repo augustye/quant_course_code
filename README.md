@@ -28,3 +28,7 @@ pip3 install vnpy_ctastrategy vnpy_ctabacktester vnpy_spreadtrading vnpy_algotra
 ### Binance测试账户：
 - 现货：https://testnet.binance.vision/
 - 合约：https://testnet.binancefuture.com/
+
+### 个人学习进展:
+- 在mac m1系统上，成功跑通数字货币/IB美股/Tushare A股的回测
+- 接下来会先依照视频教程写几个数字货币的策略，在币安模拟盘交易
