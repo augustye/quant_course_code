@@ -13,7 +13,7 @@ Forked From：https://github.com/51bitquant/course_codes （by 51bitquant）
   - No.16-19 网格策略和实盘
   - No.25-28 马丁策略和实盘（可选）
 
-### 安装示例：
+### 框架安装：
 
 - howtrader
 ```
