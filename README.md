@@ -3,7 +3,7 @@ Forked From：https://github.com/51bitquant/course_codes （by 51bitquant）
 - howtrader目录：将原教程代码合并为一份
 - vnpy目录：讲合并后的教程代码移植到vnpy3
 
-### 相关教程
+### 相关教程：
 - 网易云课堂视频：https://study.163.com/course/courseMain.htm?courseId=1210904816
 - Youtube课程视频：https://www.youtube.com/@51bitquant33/videos
 
