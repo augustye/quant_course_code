@@ -24,8 +24,9 @@ SETTINGS["log.console"] = True
 
 event_engine = EventEngine()  
 main_engine = MainEngine(event_engine) 
-main_engine.add_gateway(BinanceSpotGateway)
-#main_engine.add_gateway(BinanceUsdtGateway)
+main_engine.add_gateway(BinanceSpotGateway, "binance_spot")
+main_engine.add_gateway(BinanceUsdtGateway, "binance_usdt")
+main_engine.add_gateway(BinanceInverseGateway, "binance_inverse")
 
 cta_engine: CtaEngine = main_engine.add_app(CtaStrategyApp) # 添加cta引擎, 实际上就是初始化引擎
 main_engine.write_log("主引擎创建成功")
@@ -37,17 +38,17 @@ main_engine.write_log("注册日志事件监听")
 # 连接到交易所
 with open('.vntrader/connect_binance_spot.json') as json_file:
     connect_binance = json.load(json_file)
-    main_engine.connect(connect_binance, "")
+    main_engine.connect(connect_binance, "binance_spot")
     main_engine.write_log("connect binance gateway")
 
 sleep(10) #等待连接
 cta_engine.init_engine()
 main_engine.write_log("CTA引擎初始化完成")
 
-# 具体加载的策略来自于配置文件.vntrader/cta_strategy_settings.json
-# 仓位信息来自于.vntrader/cta_strategy_data.json
+# 具体加载的策略来自于配置文件 .vntrader/cta_strategy_setting.json
+# 仓位信息来自于 .vntrader/cta_strategy_data.json
 # 在配置文件有这个策略就不需要手动添加
-cta_engine.add_strategy('Class11SimpleStrategy', 'bnbusdt_spot', 'bnbusdt.BINANCE', {})
+cta_engine.add_strategy('Class11SimpleStrategy', 'class11', 'btcusdt.BINANCE', {})
 cta_engine.init_all_strategies()
 main_engine.write_log("CTA策略初始化完成")
 
