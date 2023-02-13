@@ -35,7 +35,7 @@ event_engine.register(EVENT_CTA_LOG, log_engine.process_log_event)
 main_engine.write_log("注册日志事件监听")
 
 # 连接到交易所
-with open('.vntrader/connect_.json') as json_file:
+with open('.vntrader/connect_binance_spot.json') as json_file:
     connect_binance = json.load(json_file)
     main_engine.connect(connect_binance, "")
     main_engine.write_log("connect binance gateway")

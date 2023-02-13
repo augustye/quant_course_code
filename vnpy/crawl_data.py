@@ -178,7 +178,7 @@ def download_future(symbol):
 
 
 if __name__ == '__main__':
-    with open('.vntrader/connect_.json') as json_file:
+    with open('.vntrader/connect_binance_spot.json') as json_file:
         connect_binance = json.load(json_file)
 
     proxy_host = connect_binance["代理地址"]
