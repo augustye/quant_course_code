@@ -144,9 +144,9 @@ def download_spot(symbol):
     下载现货数据的方法.
     :return:
     """
-    t1 = Thread(target=get_binance_data, args=(symbol, 'spot', "2018-1-1", "2018-1-31"))
-    t2 = Thread(target=get_binance_data, args=(symbol, 'spot', "2018-2-1", "2018-2-28"))
-    t3 = Thread(target=get_binance_data, args=(symbol, 'spot', "2018-3-1", "2018-3-31"))
+    t1 = Thread(target=get_binance_data, args=(symbol, 'spot', "2022-12-01", "2022-12-31"))
+    t2 = Thread(target=get_binance_data, args=(symbol, 'spot', "2023-01-01", "2023-01-31"))
+    t3 = Thread(target=get_binance_data, args=(symbol, 'spot', "2023-02-01", "2023-02-13"))
 
     t1.start()
     t2.start()
@@ -164,9 +164,9 @@ def download_future(symbol):
     """
 
     # BTCUSDT的， 要注意看该币的上市时间。
-    t1 = Thread(target=get_binance_data, args=(symbol, 'future', "2019-9-10", "2020-2-1"))
-    t2 = Thread(target=get_binance_data, args=(symbol, 'future', "2020-2-1", "2020-7-1"))
-    t3 = Thread(target=get_binance_data, args=(symbol, 'future', "2020-7-1", "2020-12-1"))
+    t1 = Thread(target=get_binance_data, args=(symbol, 'future', "2022-12-01", "2022-12-31"))
+    t2 = Thread(target=get_binance_data, args=(symbol, 'future', "2023-01-01", "2023-01-31"))
+    t3 = Thread(target=get_binance_data, args=(symbol, 'future', "2023-02-01", "2023-02-13"))
 
     t1.start()
     t2.start()
