@@ -32,6 +32,10 @@ pip3 install vnpy_ctastrategy vnpy_ctabacktester vnpy_spreadtrading vnpy_algotra
   - 数字货币接口没有Datafeed只能实盘交易，回测需预先用crawl_data.py抓取数据存到数据库中
   - IB接口设置必看： https://zhuanlan.zhihu.com/p/75787960
    
-- 接下来会先依照视频教程写几个数字货币的策略，在币安模拟盘交易。 Binance测试账户申请：
+- 测试了在币安模拟盘的自动交易，Binance测试账户申请：
   - 现货：https://testnet.binance.vision/
   - 合约：https://testnet.binancefuture.com/
+  
+- 使用课程代码回测了数字货币的两个定投策略，2022年12月到2023年2月的夏普为2
+
+- 接下来准备研究课程中的网格交易策略
