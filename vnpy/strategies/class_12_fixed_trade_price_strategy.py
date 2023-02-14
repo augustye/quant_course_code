@@ -56,15 +56,12 @@ class Class12FixedTradPriceStrategy(CtaTemplate):
         """
         四小时的K线数据.
         """
-        self.cancel_all()  # 撤销所有订单.
-        self.am.update_bar(bar)  # 把最新的K线放进时间序列里面.
-        # 下面可以计算基数指标等等....
-        # 以及下单的事情.
-
+        self.cancel_all() # 撤销所有订单.
+        self.am.update_bar(bar)  # 把最新的K线放进时间序列里面
         if not self.am.inited:
             return
 
-        # [0,1,2,3,4,5,6]
+        # 下面可以计算基数指标以及下单
         last_close_price = self.am.close_array[-2]  # 上一根K线
         current_close_price = bar.close_price # self.am.close_array[-1] #  当前的收盘价
 

@@ -5,21 +5,17 @@ from vnpy_ctastrategy.engine import  CtaTemplate, StopOrder, CtaEngine, EngineTy
 
 class Class12FixedTradeTimeStrategy(CtaTemplate):
     """
-    基于价格的定投
+    基于时间的定投
     """
-
     author = "51bitquant"
 
     fixed_trade_money = 1000
-
     parameters = ["fixed_trade_money"]
 
-
     def __init__(self, cta_engine: CtaEngine, strategy_name, vt_symbol, setting):
-        """"""
         super().__init__(cta_engine, strategy_name, vt_symbol, setting)
         self.bg_1hour = BarGenerator(self.on_bar, 1, self.on_1hour_bar, Interval.HOUR)
-        self.am = ArrayManager(size=100)  # 时间序列，类似我们用的pandas, 值保留最近的N个K线的数据.
+        self.am = ArrayManager(size=100) # 时间序列，类似我们用的pandas, 值保留最近的N个K线的数据.
 
     def on_init(self):
         """
@@ -58,13 +54,13 @@ class Class12FixedTradeTimeStrategy(CtaTemplate):
         """
         self.cancel_all()  # 取消订单.
         self.am.update_bar(bar)  # 把最新的K线放进时间序列里面.
-        if not self.am.inited:  # True
+        if not self.am.inited:  # 未达到100个数据
             return
 
         """
         定投逻辑: 周四下午三点定投， 周五下午四点定投
         """
-        # 2000 * 54  # 10万美金，
+        # 2000 * 54周 = 10万美金每年
         if bar.datetime.isoweekday() == 5 and bar.datetime.hour == 16:
             price = bar.close_price * 1.001
             self.buy(price, self.fixed_trade_money/price)
@@ -72,7 +68,6 @@ class Class12FixedTradeTimeStrategy(CtaTemplate):
         if bar.datetime.isoweekday() == 4 and bar.datetime.hour == 15:
             price = bar.close_price * 1.001
             self.buy(price, self.fixed_trade_money / price)
-
 
         # 下面可以计算基数指标等等....
         # 以及下单的事情.
