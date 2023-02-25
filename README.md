@@ -23,7 +23,8 @@ pip3 install git+https://github.com/51bitquant/howtrader.git
 ```
 pip3 install git+https://gitee.com/vnpy/vnpy.git
 pip3 install git+https://github.com/vn-crypto/vnpy_crypto.git
-pip3 install vnpy_ctastrategy vnpy_ctabacktester vnpy_spreadtrading vnpy_algotrading vnpy_optionmaster vnpy_portfoliostrategy vnpy_scripttrader vnpy_chartwizard vnpy_rpcservice vnpy_excelrtd vnpy_datamanager vnpy_datarecorder vnpy_riskmanager vnpy_webtrader vnpy_portfoliomanager vnpy_paperaccount vnpy_sqlite vnpy_rqdata vnpy_binance vnpy_ctp vnpy_tushare vnpy_ib
+pip3 install git+https://github.com/augustye/vnpy_ctastrategy.git
+pip3 install vnpy_ctabacktester vnpy_spreadtrading vnpy_algotrading vnpy_optionmaster vnpy_portfoliostrategy vnpy_scripttrader vnpy_chartwizard vnpy_rpcservice vnpy_excelrtd vnpy_datamanager vnpy_datarecorder vnpy_riskmanager vnpy_webtrader vnpy_portfoliomanager vnpy_paperaccount vnpy_sqlite vnpy_rqdata vnpy_binance vnpy_ctp vnpy_tushare vnpy_ib
 ```
 
 ### 学习进展:
