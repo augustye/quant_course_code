@@ -7,14 +7,14 @@ from vnpy_ctastrategy.engine import  CtaTemplate, StopOrder, CtaEngine, EngineTy
 from vnpy.trader.event import EVENT_TIMER, EVENT_ACCOUNT
 from vnpy.event import Event
 
-TIMER_WAITING_INTERVAL = 30
+TIMER_WAITING_INTERVAL = 10
 
 class Class16SpotGridStrategy(CtaTemplate):
     author = "51bitquant"
 
     grid_step    = 0.1  # 价格间隙，建议为交易费用的3～5倍。例如买入0.01个价格1500的以太坊再卖出，手续费为 0.01 * 1500 * 0.1% * 2 = 0.03
     trading_size = 0.01 # 每次下单的头寸，最小数量为10刀/价格
-    max_size     = 100 # 最大单边头寸
+    max_size     = 1000 # 最大网格数 self.pos <= max_size * trading_size
 
     parameters = ["grid_step", "trading_size", "max_size"]
 
