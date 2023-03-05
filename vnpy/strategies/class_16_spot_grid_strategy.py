@@ -67,13 +67,14 @@ class Class16SpotGridStrategy(CtaTemplate):
         self.timer_interval += 1
         if self.timer_interval >= TIMER_WAITING_INTERVAL:
 
+            # 如果你想比较高频可以把定时器给关了
             self.timer_interval = 0
-            # 如果你想比较高频可以把定时器给关了。
 
+            # 建立初始网格
             if len(self.buy_orders) == 0 and len(self.sell_orders) == 0:
 
+                # 限制下单的数量
                 if abs(self.pos) > self.max_size * self.trading_size:
-                    # 限制下单的数量.
                     return
 
                 buy_price = self.tick.bid_price_1 - self.grid_step / 2
@@ -85,7 +86,7 @@ class Class16SpotGridStrategy(CtaTemplate):
                 self.buy_orders.extend(buy_orders_ids)
                 self.sell_orders.extend(sell_orders_ids)
 
-                print(f"开启网格交易, BUY: {buy_orders_ids}@{buy_price}, SELL: {sell_orders_ids}@{sell_price}")
+                print(f"[开启网格交易] BUY: {buy_orders_ids}@{buy_price}, SELL: {sell_orders_ids}@{sell_price}")
 
             elif len(self.buy_orders) == 0 or len(self.sell_orders) == 0:
                 # 网格两边的数量不对等.
@@ -120,18 +121,19 @@ class Class16SpotGridStrategy(CtaTemplate):
                 self.sell_orders.remove(order.vt_orderid)
 
             self.cancel_all()
-            print(f"订单买卖单完全成交, 先撤销所有订单")
+            print("订单成交, 撤销其他订单")
 
             self.last_filled_order = order
 
-            # tick 存在且仓位数量还没有达到设置的最大值.
+            # 在订单价位上下设置网格
             if self.tick and abs(self.pos) < self.max_size * self.trading_size:
                 step = self.get_step()
 
                 buy_price = order.price - step * self.grid_step
                 sell_price = order.price + step * self.grid_step
 
-                buy_price = min(self.tick.bid_price_1 * (1 - 0.0001), buy_price)  # marker
+                # 避免超过市价
+                buy_price = min(self.tick.bid_price_1 * (1 - 0.0001), buy_price)  
                 sell_price = max(self.tick.ask_price_1 * (1 + 0.0001), sell_price)
 
                 buy_ids = self.buy(buy_price, self.trading_size)
@@ -140,8 +142,7 @@ class Class16SpotGridStrategy(CtaTemplate):
                 self.buy_orders.extend(buy_ids)
                 self.sell_orders.extend(sell_ids)
 
-                print(
-                    f"订单完全成交, 分别下双边网格: BUY: {buy_ids}@{buy_price}, SELL: {sell_ids}@{sell_price}")
+                print(f"[订单成交后更新网格] BUY: {buy_ids}@{buy_price}, SELL: {sell_ids}@{sell_price}")
 
         if not order.is_active():
             if order.vt_orderid in self.buy_orders:
