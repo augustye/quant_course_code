@@ -70,9 +70,9 @@ def main():
     # main_engine.add_gateway(NhFuturesGateway)
     # main_engine.add_gateway(NhStockGateway)
     # main_engine.add_gateway(IbGateway)
-    main_engine.add_gateway(BinanceSpotGateway, "binance_spot")
-    main_engine.add_gateway(BinanceUsdtGateway, "binance_usdt")
-    main_engine.add_gateway(BinanceInverseGateway, "binance_inverse")
+    main_engine.add_gateway(BinanceSpotGateway, "BINANCE_SPOT")
+    main_engine.add_gateway(BinanceUsdtGateway, "BINANCE_USDT")
+    main_engine.add_gateway(BinanceInverseGateway, "BINANCE_INVERSE")
 
     #main_engine.add_app(PaperAccountApp)
     main_engine.add_app(CtaStrategyApp)

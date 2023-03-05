@@ -24,9 +24,9 @@ SETTINGS["log.console"] = True
 
 event_engine = EventEngine()  
 main_engine = MainEngine(event_engine) 
-main_engine.add_gateway(BinanceSpotGateway, "binance_spot")
-main_engine.add_gateway(BinanceUsdtGateway, "binance_usdt")
-main_engine.add_gateway(BinanceInverseGateway, "binance_inverse")
+main_engine.add_gateway(BinanceSpotGateway, "BINANCE_SPOT")
+main_engine.add_gateway(BinanceUsdtGateway, "BINANCE_USDT")
+main_engine.add_gateway(BinanceInverseGateway, "BINANCE_INVERSE")
 
 cta_engine: CtaEngine = main_engine.add_app(CtaStrategyApp) # 添加cta引擎, 实际上就是初始化引擎
 main_engine.write_log("主引擎创建成功")
@@ -38,7 +38,7 @@ main_engine.write_log("注册日志事件监听")
 # 连接到交易所
 with open('.vntrader/connect_binance_spot.json') as json_file:
     connect_binance = json.load(json_file)
-    main_engine.connect(connect_binance, "binance_spot")
+    main_engine.connect(connect_binance, "BINANCE_SPOT")
     main_engine.write_log("connect binance gateway")
 
 sleep(10) #等待连接
