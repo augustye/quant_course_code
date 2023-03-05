@@ -10,17 +10,11 @@ from vnpy.event import Event
 TIMER_WAITING_INTERVAL = 30
 
 class Class16SpotGridStrategy(CtaTemplate):
-    """
-    币安现货网格交易策略
-    免责声明: 本策略仅供测试参考，本人不负有任何责任。使用前请熟悉代码。测试其中的bugs, 请清楚里面的功能后使用。
-    币安邀请链接: https://www.binancezh.pro/cn/futures/ref/51bitquant
-    合约邀请码：51bitquant
-    """
     author = "51bitquant"
 
-    grid_step = 2.0  # 网格间隙.  价格*手续费*5  0.001 * 4
-    trading_size = 0.5  # 每次下单的头寸.  # 数量乘以价格>= 10USDT
-    max_size = 100.0  # 最大单边的数量.
+    grid_step    = 0.1  # 价格间隙，建议为交易费用的3～5倍。例如买入0.01个价格1500的以太坊再卖出，手续费为 0.01 * 1500 * 0.1% * 2 = 0.03
+    trading_size = 0.01 # 每次下单的头寸，最小数量为10刀/价格
+    max_size     = 100 # 最大单边头寸
 
     parameters = ["grid_step", "trading_size", "max_size"]
 
@@ -40,7 +34,7 @@ class Class16SpotGridStrategy(CtaTemplate):
 
         # 订阅的资产信息. BINANCE_SPOT.资产名
         self.cta_engine.event_engine.register(EVENT_ACCOUNT + "BINANCE_SPOT.USDT", self.process_account_event)
-        self.cta_engine.event_engine.register(EVENT_ACCOUNT + "BINANCE_SPOT.BNB", self.process_account_event)
+        self.cta_engine.event_engine.register(EVENT_ACCOUNT + "BINANCE_SPOT.BTC", self.process_account_event)
         self.cta_engine.event_engine.register(EVENT_ACCOUNT + "BINANCE_SPOT.ETH", self.process_account_event)
 
     def on_init(self):
@@ -91,7 +85,7 @@ class Class16SpotGridStrategy(CtaTemplate):
                 self.buy_orders.extend(buy_orders_ids)
                 self.sell_orders.extend(sell_orders_ids)
 
-                print(f"开启网格交易，双边下单：BUY: {buy_orders_ids}@{buy_price}, SELL: {sell_orders_ids}@{sell_price}")
+                print(f"开启网格交易, BUY: {buy_orders_ids}@{buy_price}, SELL: {sell_orders_ids}@{sell_price}")
 
             elif len(self.buy_orders) == 0 or len(self.sell_orders) == 0:
                 # 网格两边的数量不对等.
