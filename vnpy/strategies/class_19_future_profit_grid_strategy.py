@@ -21,25 +21,22 @@ class GridPositionCalculator(object):
     """
 
     def __init__(self, grid_step: float = 1.0):
-        self.pos: Decimal = Decimal("0")
-        self.avg_price: Decimal = Decimal("0")
-        self.grid_step: Decimal = Decimal(str(grid_step))
+        self.pos = 0
+        self.avg_price = 0
+        self.grid_step = grid_step
 
     def update_position(self, order: OrderData):
-        if order.status != Status.ALLTRADED:
-            return
-
         previous_pos = self.pos
         previous_avg = self.avg_price
 
         if order.direction == Direction.LONG:
             self.pos += order.volume
 
-            if self.pos == Decimal("0"):
-                self.avg_price = Decimal("0")
+            if self.pos == 0:
+                self.avg_price = 0
             else:
 
-                if previous_pos == Decimal("0"):
+                if previous_pos == 0:
                     self.avg_price = order.price
 
                 elif previous_pos > 0:
@@ -56,11 +53,11 @@ class GridPositionCalculator(object):
         elif order.direction == Direction.SHORT:
             self.pos -= order.volume
 
-            if self.pos == Decimal("0"):
-                self.avg_price = Decimal("0")
+            if self.pos == 0:
+                self.avg_price = 0
             else:
 
-                if previous_pos == Decimal("0"):
+                if previous_pos == 0:
                     self.avg_price = order.price
 
                 elif previous_pos < 0:

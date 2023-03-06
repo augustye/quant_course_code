@@ -1,8 +1,7 @@
-from decimal import Decimal
 from typing import Optional
 
 from vnpy.trader.constant import Interval
-from vnpy.trader.object import TickData, BarData, TradeData, OrderData, Status
+from vnpy.trader.object import TickData, BarData, TradeData, OrderData, Status, Direction
 from vnpy.trader.utility import BarGenerator, ArrayManager
 from vnpy_ctastrategy.engine import  CtaTemplate, StopOrder, CtaEngine, EngineType
 from vnpy.trader.event import EVENT_TIMER, EVENT_ACCOUNT
@@ -20,25 +19,22 @@ class GridPositionCalculator(object):
     """
 
     def __init__(self, grid_step: float = 1.0):
-        self.pos: Decimal = Decimal("0")
-        self.avg_price: Decimal = Decimal("0")
-        self.grid_step: Decimal = Decimal(str(grid_step))
+        self.pos = 0
+        self.avg_price = 0
+        self.grid_step = grid_step
 
     def update_position(self, order: OrderData):
-        if order.status != Status.ALLTRADED:
-            return
-
         previous_pos = self.pos
         previous_avg = self.avg_price
 
         if order.direction == Direction.LONG:
             self.pos += order.volume
 
-            if self.pos == Decimal("0"):
-                self.avg_price = Decimal("0")
+            if self.pos == 0:
+                self.avg_price = 0
             else:
 
-                if previous_pos == Decimal("0"):
+                if previous_pos == 0:
                     self.avg_price = order.price
 
                 elif previous_pos > 0:
@@ -55,11 +51,11 @@ class GridPositionCalculator(object):
         elif order.direction == Direction.SHORT:
             self.pos -= order.volume
 
-            if self.pos == Decimal("0"):
-                self.avg_price = Decimal("0")
+            if self.pos == 0:
+                self.avg_price = 0
             else:
 
-                if previous_pos == Decimal("0"):
+                if previous_pos == 0:
                     self.avg_price = order.price
 
                 elif previous_pos < 0:
@@ -83,10 +79,10 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
     """
     author = "51bitquant"
 
-    grid_step = 2.0  # 网格间隙.
-    profit_step = 2.0  # 获利的间隔.
-    trading_size = 1.0  # 每次下单的头寸.
-    max_pos = 100  # 最大的头寸数, 表示不会触发止损的条件.
+    grid_step = 0.1  # 网格间隙.
+    profit_step = 0.1  # 获利的间隔.
+    trading_size = 0.01  # 每次下单的头寸.
+    max_pos = 1000  # 最大的头寸数, 表示不会触发止损的条件.
     profit_orders_counts = 10  # 出现单边吃单太多的时候会考虑止盈.
     trailing_stop_multiplier = 2.0
     stop_minutes = 360.0  # sleep for six hour
@@ -125,7 +121,7 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
         Callback when strategy is inited.
         """
         self.position_calculator.pos = self.pos
-        self.position_calculator.avg_price = Decimal(str(self.avg_price))
+        self.position_calculator.avg_price = self.avg_price
         self.write_log("策略初始化")
 
     def on_start(self):
@@ -162,12 +158,12 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
             self.normal_timer_interval = 0
 
             # 仓位为零的时候
-            if abs(self.pos) < Decimal(str(self.trading_size)):
+            if abs(self.pos) < self.trading_size:
                 if len(self.long_orders) == 0 and len(self.short_orders) == 0:
                     buy_price = self.tick.bid_price_1 - self.grid_step / 2
                     sell_price = self.tick.bid_price_1 + self.grid_step / 2
-                    long_ids = self.buy(Decimal(buy_price),Decimal(str(self.trading_size)))
-                    short_ids = self.sell(Decimal(sell_price), Decimal(str(self.trading_size)))
+                    long_ids = self.buy(buy_price,self.trading_size)
+                    short_ids = self.sell(sell_price, self.trading_size)
 
                     self.long_orders.extend(long_ids)
                     self.short_orders.extend(short_ids)
@@ -199,8 +195,8 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
 
                 buy_price = min(self.tick.bid_price_1, buy_price)
                 sell_price = max(self.tick.ask_price_1, sell_price)
-                long_ids = self.buy(Decimal(buy_price), Decimal(str(self.trading_size)))
-                short_ids = self.sell(Decimal(sell_price), Decimal(str(self.trading_size)))
+                long_ids = self.buy(buy_price, self.trading_size)
+                short_ids = self.sell(sell_price, self.trading_size)
 
                 self.long_orders.extend(long_ids)
                 self.short_orders.extend(short_ids)
@@ -218,13 +214,13 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
                 if self.pos > 0:
                     price = max(self.tick.ask_price_1 * (1 + 0.0001),
                                 float(self.position_calculator.avg_price) + self.profit_step)
-                    order_ids = self.sell(Decimal(price), Decimal(abs(self.pos)))
+                    order_ids = self.sell(price, abs(self.pos))
                     self.profit_orders.extend(order_ids)
                     print(f"多头止盈情况: {self.pos}@{price}")
                 elif self.pos < 0:
                     price = min(self.tick.bid_price_1 * (1 - 0.0001),
                                 float(self.position_calculator.avg_price) - self.profit_step)
-                    order_ids = self.buy(Decimal(price), Decimal(abs(self.pos)))
+                    order_ids = self.buy(price, abs(self.pos))
                     self.profit_orders.extend(order_ids)
                     print(f"空头止盈情况: {self.pos}@{price}")
 
@@ -241,23 +237,23 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
                 if self.last_filled_order:
                     if self.pos > 0:
                         if self.tick.bid_price_1 < float(self.last_filled_order.price) - self.trailing_stop_multiplier * self.grid_step:
-                            vt_ids = self.sell(Decimal(self.tick.bid_price_1), Decimal(abs(self.pos)))
+                            vt_ids = self.sell(self.tick.bid_price_1, abs(self.pos))
                             self.stop_orders.extend(vt_ids)
 
                     elif self.pos < 0:
                         if self.tick.ask_price_1 > float(self.last_filled_order.price) + self.trailing_stop_multiplier * self.grid_step:
-                            vt_ids = self.buy(Decimal(self.tick.ask_price_1), Decimal(abs(self.pos)))
+                            vt_ids = self.buy(self.tick.ask_price_1, abs(self.pos))
                             self.stop_orders.extend(vt_ids)
 
                 else:
                     if self.pos > 0:
                         if self.tick.bid_price_1 < float(self.position_calculator.avg_price) - self.max_pos * self.grid_step:
-                            vt_ids = self.sell(Decimal(self.tick.bid_price_1), Decimal(abs(self.pos)))
+                            vt_ids = self.sell(self.tick.bid_price_1,abs(self.pos))
                             self.stop_orders.extend(vt_ids)
 
                     elif self.pos < 0:
                         if self.tick.ask_price_1 > float(self.position_calculator.avg_price) + self.max_pos * self.grid_step:
-                            vt_ids = self.buy(Decimal(self.tick.ask_price_1), Decimal(abs(self.pos)))
+                            vt_ids = self.buy(self.tick.ask_price_1, abs(self.pos))
                             self.stop_orders.extend(vt_ids)
 
     def on_tick(self, tick: TickData):
@@ -276,7 +272,6 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
         """
         Callback of new order data update.
         """
-
         if order.status == Status.ALLTRADED:
             if order.vt_orderid in (self.long_orders + self.short_orders):
 
@@ -291,7 +286,7 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
 
                 self.last_filled_order = order
 
-                if abs(self.pos) < Decimal(str(self.trading_size)):
+                if abs(self.pos) < self.trading_size:
                     print("仓位为零， 需要重新开始.")
                     return
 
@@ -307,8 +302,8 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
                     buy_price = min(self.tick.bid_price_1 * (1 - 0.0001), buy_price)
                     sell_price = max(self.tick.ask_price_1 * (1 + 0.0001), sell_price)
 
-                    long_ids = self.buy(Decimal(buy_price), Decimal(str(self.trading_size)))
-                    short_ids = self.sell(Decimal(sell_price), Decimal(str(self.trading_size)))
+                    long_ids = self.buy(buy_price, self.trading_size)
+                    short_ids = self.sell(sell_price,self.trading_size)
 
                     self.long_orders.extend(long_ids)
                     self.short_orders.extend(short_ids)
@@ -318,13 +313,13 @@ class Class17SpotProfitGridStrategy(CtaTemplate):
 
             elif order.vt_orderid in self.profit_orders:
                 self.profit_orders.remove(order.vt_orderid)
-                if abs(self.pos) < Decimal(str(self.trading_size)):
+                if abs(self.pos) < self.trading_size:
                     self.cancel_all()
                     print(f"止盈单子成交,且仓位为零, 先撤销所有订单，然后重新开始")
 
             elif order.vt_orderid in self.stop_orders:
                 self.stop_orders.remove(order.vt_orderid)
-                if abs(self.pos) < Decimal(str(self.trading_size)):
+                if abs(self.pos) < self.trading_size:
                     self.trigger_stop_loss = True
                     self.cancel_all()
 
