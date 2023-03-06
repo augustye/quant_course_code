@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Optional
 
 from vnpy.trader.constant import Interval
@@ -20,9 +19,9 @@ class Class19FutureNeutralGridStrategy(CtaTemplate):
     """
     author = "51bitquant"
 
-    high_price = 0.0  # 执行策略的最高价.
-    low_price = 0.0  # 执行策略的最低价.
-    grid_count = 100  # 网格的数量.
+    high_price = 2000.0  # 执行策略的最高价.
+    low_price = 1000.0  # 执行策略的最低价.
+    grid_count = 10000  # 网格的数量.
     order_volume = 0.05  # 每次下单的数量.
     max_open_orders = 2  # 一边订单的数量.
 
@@ -40,7 +39,7 @@ class Class19FutureNeutralGridStrategy(CtaTemplate):
         self.short_orders = []  # 所有的short orders.
         self.tick: Optional[TickData] = None
         self.bg = BarGenerator(self.on_bar)
-        self.step_price = 0
+        self.step_price = 1
 
     def on_init(self):
         """
@@ -87,7 +86,7 @@ class Class19FutureNeutralGridStrategy(CtaTemplate):
                     if price < self.low_price:
                         break
 
-                    orders = self.buy(Decimal(price), Decimal(self.order_volume))
+                    orders = self.buy(price, self.order_volume)
                     self.long_orders.extend(orders)
 
             if len(self.short_orders) == 0:
@@ -96,7 +95,7 @@ class Class19FutureNeutralGridStrategy(CtaTemplate):
                     if price > self.high_price:
                         break
 
-                    orders = self.short(Decimal(price), Decimal(self.order_volume))
+                    orders = self.short(price, self.order_volume)
                     self.short_orders.extend(orders)
 
         if len(self.short_orders + self.long_orders) > 100:
@@ -118,32 +117,32 @@ class Class19FutureNeutralGridStrategy(CtaTemplate):
                 self.long_orders.remove(order.vt_orderid)
                 self.trade_count += 1
 
-                short_price = order.price + Decimal(self.step_price)
+                short_price = order.price + self.step_price
 
                 if short_price <= self.high_price:
-                    orders = self.short(short_price, Decimal(self.order_volume))
+                    orders = self.short(short_price, self.order_volume)
                     self.short_orders.extend(orders)
 
                 if len(self.long_orders) < self.max_open_orders:
                     count = len(self.long_orders) + 1
-                    long_price = order.price - Decimal(self.step_price) * Decimal(str(count))
+                    long_price = order.price - self.step_price * count
                     if long_price >= self.low_price:
-                        orders = self.buy(long_price, Decimal(self.order_volume))
+                        orders = self.buy(long_price, self.order_volume)
                         self.long_orders.extend(orders)
 
             if order.vt_orderid in self.short_orders:
                 self.short_orders.remove(order.vt_orderid)
                 self.trade_count += 1
-                long_price = order.price - Decimal(self.step_price)
+                long_price = order.price - self.step_price
                 if long_price >= self.low_price:
-                    orders = self.buy(long_price, Decimal(self.order_volume))
+                    orders = self.buy(long_price, self.order_volume)
                     self.long_orders.extend(orders)
 
                 if len(self.short_orders) < self.max_open_orders:
                     count = len(self.long_orders) + 1
-                    short_price = order.price + Decimal(self.step_price) * Decimal(str(count))
+                    short_price = order.price + self.step_price * count
                     if short_price <= self.high_price:
-                        orders = self.short(short_price, Decimal(self.order_volume))
+                        orders = self.short(short_price, self.order_volume)
                         self.short_orders.extend(orders)
 
         if not order.is_active():
