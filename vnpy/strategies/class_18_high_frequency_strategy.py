@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Optional
 
 from vnpy.trader.constant import Interval
@@ -77,10 +76,10 @@ class Class18HighFrequencyStrategy(CtaTemplate):
     """
     author = "51bitquant"
 
-    grid_step = 1.0
+    grid_step = 0.1
     stop_multiplier = 15.0
-    trading_size = 1.0
-    max_pos = 15.0  # 最大的持仓数量.
+    trading_size = 0.01
+    max_pos = 1000  # 最大的持仓数量.
     stop_mins = 15.0  # 出现亏损是，暂停多长时间.
 
     # 变量.
@@ -94,7 +93,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
         super().__init__(cta_engine, strategy_name, vt_symbol, setting)
 
         self.position = GridPositionCalculator(grid_step=self.grid_step)
-        self.position.avg_price = Decimal(str(self.avg_price))
+        self.position.avg_price = self.avg_price
         self.position.pos = self.pos
 
         # orders
@@ -160,18 +159,19 @@ class Class18HighFrequencyStrategy(CtaTemplate):
                 price = float(self.position.avg_price) + self.grid_step
                 price = max(price, self.tick.ask_price_1 * (1 + 0.0001))
 
-                vts = self.sell(Decimal(price), abs(self.pos))
+                vts = self.sell(price, abs(self.pos))
                 self.profit_orders.extend(vts)
                 print(f"多头重新下止盈单子: {vts}@{price}")
 
             elif self.pos < 0 and len(self.profit_orders) == 0:
+                price = self.tick.bid_price_1 * (1 - 0.0001)
+                price2 = float(self.position.avg_price) - self.grid_step
+                if price2 > 0:
+                    price = min(price, price2)
 
-                price = float(self.position.avg_price) - self.grid_step
-                price = min(price, self.tick.bid_price_1 * (1 - 0.0001))
-
-                vts = self.cover(Decimal(price), abs(self.pos))
+                vts = self.cover(price, abs(self.pos))
                 self.profit_orders.extend(vts)
-                print(f"空头重新下止盈单子: {vts}@{price}")
+                print(f"空头重新下止盈单子: {self.pos}@{price}")
 
         self.cancel_order_interval += 1
 
@@ -190,7 +190,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
                     step = self.get_step()
                     price = float(self.last_filled_order.price) - self.grid_step * step
                     price = min(price, self.tick.bid_price_1 * (1 - 0.0001))
-                    ids = self.buy(Decimal(price), Decimal(self.trading_size))
+                    ids = self.buy(price, self.trading_size)
                     self.long_orders.extend(ids)
 
                 elif self.pos < 0 and len(self.short_orders) == 0 and self.last_filled_order:
@@ -199,7 +199,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
                     price = float(self.last_filled_order.price) + self.grid_step * step
                     price = max(price, self.tick.ask_price_1 * (1 + 0.0001))
 
-                    ids = self.short(Decimal(price), Decimal(self.trading_size))
+                    ids = self.short(price, self.trading_size)
                     self.short_orders.extend(ids)
 
     def on_tick(self, tick: TickData):
@@ -221,8 +221,8 @@ class Class18HighFrequencyStrategy(CtaTemplate):
                 buy_price = tick.bid_price_1 - self.grid_step / 2
                 sell_price = tick.bid_price_1 + self.grid_step / 2
 
-                long_ids = self.buy(Decimal(buy_price), Decimal(self.trading_size))
-                short_ids = self.short(Decimal(sell_price), Decimal(self.trading_size))
+                long_ids = self.buy(buy_price, self.trading_size)
+                short_ids = self.sell(sell_price, self.trading_size)
 
                 self.long_orders.extend(long_ids)
                 self.short_orders.extend(short_ids)
@@ -234,7 +234,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
             if self.pos > 0:
                 long_stop_price = float(self.position.avg_price) - self.stop_multiplier * self.grid_step
                 if tick.ask_price_1 < long_stop_price:
-                    vt_ids = self.sell(Decimal(tick.ask_price_1), abs(self.pos))
+                    vt_ids = self.sell(tick.ask_price_1, abs(self.pos))
                     self.stop_orders.extend(vt_ids)
                     self.trigger_stop_loss = True
                     print(f"下多头止损单: stop_price: {long_stop_price}stop@{tick.ask_price_1}")
@@ -242,7 +242,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
             elif self.pos < 0:
                 short_stop_price = float(self.position.avg_price) + self.stop_multiplier * self.grid_step
                 if tick.bid_price_1 > short_stop_price:
-                    vt_ids = self.cover(Decimal(tick.bid_price_1), abs(self.pos))
+                    vt_ids = self.cover(tick.bid_price_1, abs(self.pos))
                     self.stop_orders.extend(vt_ids)
                     self.trigger_stop_loss = True
                     print(f"下空头止损单: stop_price: {short_stop_price}stop@{tick.bid_price_1}")
@@ -299,7 +299,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
                         step = self.get_step()
                         price = float(order.price) - self.grid_step * step
                         price = min(price, self.tick.bid_price_1 * (1 - 0.0001))
-                        ids = self.buy(Decimal(price), Decimal(self.trading_size))
+                        ids = self.buy(price, self.trading_size)
                         self.long_orders.extend(ids)
                         print(f"多头仓位继续下多头订单: {ids}@{price}")
 
@@ -325,7 +325,7 @@ class Class18HighFrequencyStrategy(CtaTemplate):
                         price = float(order.price) + self.grid_step * step
                         price = max(price, self.tick.ask_price_1 * (1 + 0.0001))
 
-                        ids = self.short(Decimal(price), Decimal(self.trading_size))
+                        ids = self.short(price, self.trading_size)
                         self.short_orders.extend(ids)
 
                         print(f"空头仓位继续下空头订单: {ids}@{price}")

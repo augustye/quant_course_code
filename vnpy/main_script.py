@@ -50,7 +50,9 @@ main_engine.write_log("CTA引擎初始化完成")
 # 在配置文件有这个策略就不需要手动添加
 #cta_engine.add_strategy('Class11SimpleStrategy', 'class11', 'btcusdt.BINANCE', {})
 #cta_engine.add_strategy('Class16SpotGridStrategy', 'class16', 'ethusdt.BINANCE', {})
-cta_engine.add_strategy('Class17SpotProfitGridStrategy', 'class17', 'ethusdt.BINANCE', {})
+#cta_engine.add_strategy('Class17SpotProfitGridStrategy', 'class17', 'ethusdt.BINANCE', {})
+cta_engine.add_strategy('Class18HighFrequencyStrategy', 'class18', 'ethusdt.BINANCE', {})
+
 cta_engine.init_all_strategies()
 main_engine.write_log("CTA策略初始化完成")
 
